@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
+import com.devyssonsc.view_pdfs_backend.Services.PdfFileService;
 import com.devyssonsc.view_pdfs_backend.models.PdfFile;
 import com.devyssonsc.view_pdfs_backend.repositories.PdfFileRepository;
 
@@ -19,7 +20,7 @@ import com.devyssonsc.view_pdfs_backend.repositories.PdfFileRepository;
 public class FileUploadController {
     
     @Autowired
-    private PdfFileRepository pdfFileRepository;
+    private PdfFileService pdfFileService;
 
     @PostMapping("/upload")
     public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file)
@@ -40,14 +41,12 @@ public class FileUploadController {
             pdfFile.setFileName(file.getOriginalFilename().replace(".html", ".pdf"));
             pdfFile.setFileContent(outputStream.toByteArray());
 
-            this.pdfFileRepository.save(pdfFile);
+            this.pdfFileService.create(pdfFile);
 
             return ResponseEntity.ok().body("PDF salvo com sucessso!");
 
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
-
-
     }
 }
