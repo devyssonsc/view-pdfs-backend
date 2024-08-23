@@ -1,18 +1,17 @@
 package com.devyssonsc.view_pdfs_backend.controllers;
 
-import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.xhtmlrenderer.pdf.ITextRenderer;
 
 import com.devyssonsc.view_pdfs_backend.Services.PdfFileService;
-import com.devyssonsc.view_pdfs_backend.models.PdfFile;
 
 @RestController
 @RequestMapping("/api")
@@ -25,29 +24,17 @@ public class FileUploadController {
     public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file)
     {
         try {
-            //Converter o arquivo Multipart para String(HTML)
+            String fileName = file.getOriginalFilename();
             String htmlContent = new String(file.getBytes());
 
-            //Converter HTML para PDF
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            ITextRenderer renderer = new ITextRenderer();
-            renderer.setDocumentFromString(htmlContent);
-            renderer.layout();
-            renderer.createPDF(outputStream);
+            pdfFileService.convertAndCreate(fileName, htmlContent);
 
-            //Criar uma instancia de PdfFile e salvar no banco
-            PdfFile pdfFile = new PdfFile();
-            pdfFile.setFileName(file.getOriginalFilename().replace(".html", ".pdf"));
-            pdfFile.setFileContent(outputStream.toByteArray());
-
-            this.pdfFileService.create(pdfFile);
-
-            return ResponseEntity.ok().body("PDF salvo com sucessso!");
-
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.ok("Arquivo convertido e salvo com sucesso.");
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Falha ao converter e salvar o arquivo: " + e.getMessage());
         }
     }
 
-    
+
 }
