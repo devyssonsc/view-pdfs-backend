@@ -15,6 +15,9 @@ import com.devyssonsc.view_pdfs_backend.models.PdfFile;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 
 
 @RestController
@@ -24,11 +27,23 @@ public class FileUploadController {
     @Autowired
     private PdfFileService pdfFileService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<PdfFile> getPdf(@PathVariable Long id) {
+    @GetMapping("/download/{id}")
+    public ResponseEntity<Resource> downloadPdf(@PathVariable Long id) {
+        // Get the PDF file from the service
         PdfFile pdf = pdfFileService.getPdf(id);
 
-        return ResponseEntity.ok().body(pdf);
+        // Create a ByteArrayResource from the PDF file content
+        ByteArrayResource resource = new ByteArrayResource(pdf.getFileContent());
+
+        // Set the response headers for file download
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename='arquivo.pdf'");
+        headers.add(HttpHeaders.CONTENT_TYPE, "application/pdf");
+
+        // Return the ResponseEntity with the PDF file as the response body
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(resource);
     }
     
 
