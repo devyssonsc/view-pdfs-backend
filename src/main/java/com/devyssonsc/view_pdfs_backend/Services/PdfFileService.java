@@ -2,6 +2,7 @@ package com.devyssonsc.view_pdfs_backend.Services;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,18 +26,29 @@ public class PdfFileService {
     //         "PDF não encontrado! Id: " + id + ", Tipo: " + PdfFile.class.getName()
     //     ));
     // }
+    public PdfFile getPdf(Long id)
+    {
+        Optional<PdfFile> pdfFile = pdfFileRepository.findById(id);
+
+        return pdfFile.orElseThrow(() -> new RuntimeException(
+            "Arquivo não encontrado! Id:" + id + ", Tipo: " + PdfFile.class.getName()
+        ));
+    }
 
     @Transactional
-    public PdfFile convertAndCreate(String fileName, String htmlContent) throws IOException
+    public PdfFile convertAndCreate(String htmlContent) throws IOException
     {
+        //Instancia ITextRenderer e ByteArrayOutputStream
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ITextRenderer renderer = new ITextRenderer();
+
+        //Converte uma string HTML em PDF
         renderer.setDocumentFromString(htmlContent);
         renderer.layout();
         renderer.createPDF(outputStream);
 
+        //Salva um PdfFile no banco
         PdfFile pdfFile = new PdfFile();
-        pdfFile.setFileName(fileName);
         pdfFile.setFileContent(outputStream.toByteArray());
         return pdfFileRepository.save(pdfFile);
     }

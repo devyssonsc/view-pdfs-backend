@@ -20,11 +20,11 @@ public class PdfFile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "file_name")
-    private String fileName;
+    // @Column(name = "file_name")
+    // private String fileName;
 
     @Lob
-    @Column(name = "file_content")
+    @Column(name = "file_content", columnDefinition = "MEDIUMBLOB")
     private byte[] fileContent;
 
 }
