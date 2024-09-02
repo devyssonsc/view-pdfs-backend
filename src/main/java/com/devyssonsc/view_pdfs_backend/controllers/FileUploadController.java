@@ -47,7 +47,8 @@ public class FileUploadController {
     }
     
 
-    @PostMapping("/upload")
+    // @PostMapping("/upload")
+    @PostMapping(value = "/upload", consumes = "text/html")
     public ResponseEntity<String> ConvertandCreate(@RequestBody String htmlContent)
     {
         try {
